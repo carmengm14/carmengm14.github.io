@@ -9,6 +9,7 @@ const TEMPLATES=[
  {id:"70x40",name:"Etiqueta 70 × 40 mm",size:[70,40],image:"assets/portadas/70x40.svg",description:"Formato horizontal de mayor altura."},
  {id:"48-5x25-4",name:"Etiqueta 48,5 × 25,4 mm",size:[48.5,25.4],image:"assets/portadas/48-5x25-4.svg",description:"Formato compacto para etiquetas pequeñas."}
 ];
+const CUSTOM_TEMPLATE={id:"custom",name:"Etiqueta personalizada",size:[100,50],image:"",description:"Tamaño y composición completamente libres."};
 
 const DEFAULT_TEXT={
  producto:{size:9,weight:700,align:"left",lineHeight:1.1},
@@ -18,6 +19,7 @@ const DEFAULT_TEXT={
 };
 
 let selectedTemplate=TEMPLATES[0],rows=[],currentRow=0,commonLogo=null,targetDirectory=null,customFontFamily=null;
+let customSize={width:100,height:50};
 let logoState={x:6,y:18,w:36,h:48};
 let lockLogoAspect=true;
 let qrState={x:7,y:20,size:22};
@@ -43,16 +45,35 @@ function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
 function renderHome(){
  $("#template-grid").innerHTML=TEMPLATES.map(t=>`<article class="template-card"><button onclick="selectTemplate('${t.id}')"><div class="template-thumb"><img src="${t.image}" alt="${esc(t.name)}" onerror="this.style.opacity='.25'"></div><div class="template-meta"><div><h3>${esc(t.name)}</h3><p>${esc(t.description)}</p></div><span class="size">${t.size[0]} × ${t.size[1]} mm</span></div></button></article>`).join("");
 }
+function updateTemplateUI(){
+ const isCustom=selectedTemplate.id==="custom";
+ $("#customSizeBlock")?.classList.toggle("hidden",!isCustom);
+ if(isCustom){
+   $("#customWidth").value=customSize.width;$("#customHeight").value=customSize.height;
+   $("#dimensionsPill").textContent=`${customSize.width} × ${customSize.height} mm`;
+ }
+ $("#stylePanelTitle").textContent=isCustom?"3. Estilo general":"2. Estilo general";
+ $("#logoPanelTitle").textContent=isCustom?"4. Logo":"3. Logo";
+ $("#qrPanelTitle").textContent=isCustom?"5. QR":"4. QR";
+ const textTitle=document.querySelector("#textElement")?.closest(".panel-block")?.querySelector(".panel-title");
+ if(textTitle) textTitle.textContent=isCustom?"6. Texto":"5. Texto";
+ const guideTitle=$("#addGuideV")?.closest(".panel-block")?.querySelector(".panel-title");
+ if(guideTitle) guideTitle.textContent=isCustom?"7. Reglas y guías":"6. Reglas y guías";
+ const generateTitle=$("#generateBtn")?.closest(".panel-block")?.querySelector(".panel-title");
+ if(generateTitle) generateTitle.textContent=isCustom?"8. Generar":"7. Generar";
+}
 window.selectTemplate=function(id){
- selectedTemplate=TEMPLATES.find(x=>x.id===id)||TEMPLATES[0];
+ selectedTemplate=id==="custom"?CUSTOM_TEMPLATE:(TEMPLATES.find(x=>x.id===id)||TEMPLATES[0]);
  $("#screen-home").classList.remove("active");$("#screen-editor").classList.add("active");
  $("#editorTitle").textContent=selectedTemplate.name;$("#editorDescription").textContent=selectedTemplate.description;
+ updateTemplateUI();
  $("#dimensionsPill").textContent=`${selectedTemplate.size[0]} × ${selectedTemplate.size[1]} mm`;
  resetElementPositions();updatePreview();window.scrollTo({top:0,behavior:"smooth"});
 };
 $("#backBtn").onclick=()=>{$("#screen-editor").classList.remove("active");$("#screen-home").classList.add("active")};
 
 function resetElementPositions(){
+ if(selectedTemplate.id==="custom") selectedTemplate.size=[Number(customSize.width)||100,Number(customSize.height)||50];
  logoState=selectedTemplate.id==="70x40"
    ? {x:54,y:7,w:39,h:16}
    : {x:6,y:18,w:36,h:48};
@@ -64,6 +85,15 @@ function resetElementPositions(){
  qrDataUrl=null;qrGenerationKey="";
  renderGuides();
 }
+["customWidth","customHeight"].forEach(id=>$("#"+id)?.addEventListener("input",()=>{
+ if(selectedTemplate.id!=="custom")return;
+ const value=Math.max(5,Number($("#"+id).value)||5);
+ if(id==="customWidth") customSize.width=value; else customSize.height=value;
+ selectedTemplate.size=[customSize.width,customSize.height];
+ $("#dimensionsPill").textContent=`${customSize.width} × ${customSize.height} mm`;
+ resetElementPositions();updatePreview();
+}));
+
 function parseCSV(file){
  Papa.parse(file,{header:true,skipEmptyLines:true,complete:r=>{
   rows=r.data.map(cleanRow);currentRow=0;

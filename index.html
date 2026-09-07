@@ -27,6 +27,15 @@
     <span class="muted">Las imágenes de esta portada las podrás sustituir por las tuyas.</span>
   </div>
   <div class="template-grid" id="template-grid"></div>
+  <div class="custom-template-card">
+    <button class="custom-template-button" onclick="selectTemplate('custom')" type="button">
+      <div class="custom-template-icon">＋</div>
+      <div class="template-meta">
+        <div><h3>Personalizar tu etiqueta al 100%</h3><p>Define el ancho, alto y coloca cada elemento exactamente donde quieras.</p></div>
+        <span class="size">Tamaño libre</span>
+      </div>
+    </button>
+  </div>
 </section>
 
 <section id="screen-editor" class="screen">
@@ -47,8 +56,17 @@
         <div class="file-info hidden" id="csvInfo"></div>
       </div>
 
+      <div class="panel-block custom-size-block hidden" id="customSizeBlock">
+        <div class="panel-title">2. Tamaño personalizado</div>
+        <div class="control-grid custom-size-grid">
+          <label>Ancho <span><input type="number" id="customWidth" min="5" max="1000" step="0.1" value="100"> mm</span></label>
+          <label>Alto <span><input type="number" id="customHeight" min="5" max="1000" step="0.1" value="50"> mm</span></label>
+        </div>
+        <small class="hint">Puedes crear cualquier tamaño de etiqueta. Las reglas y posiciones de los elementos se adaptan automáticamente a estas medidas.</small>
+      </div>
+
       <div class="panel-block">
-        <div class="panel-title">2. Estilo general</div>
+        <div class="panel-title" id="stylePanelTitle">2. Estilo general</div>
         <div class="field-row">
           <label>Fondo<input type="color" id="bgColor" value="#050505"></label>
           <label>Texto<input type="color" id="textColor" value="#ffffff"></label>
@@ -62,7 +80,7 @@
       </div>
 
       <div class="panel-block">
-        <div class="panel-title">3. Logo</div>
+        <div class="panel-title" id="logoPanelTitle">3. Logo</div>
         <label class="upload-small"><input type="file" id="logoInput" accept="image/*"><span>Subir logo común</span></label>
         <div class="logo-controls">
           <div class="subheading">Posición y tamaño</div>
@@ -78,7 +96,7 @@
       </div>
 
       <div class="panel-block">
-        <div class="panel-title">4. QR</div>
+        <div class="panel-title" id="qrPanelTitle">4. QR</div>
         <div class="field-row qr-color-row">
           <label>Color QR<input type="color" id="qrColor" value="#ffffff"></label>
         </div>
