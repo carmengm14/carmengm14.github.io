@@ -3,126 +3,163 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Generador de etiquetas</title>
+  <title>Label Lab — Generador de etiquetas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/font/lucide.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <span class="brand-mark">L</span>
-      <div><strong>LABEL LAB</strong><small>Generador de etiquetas</small></div>
-    </div>
-    <span class="status" id="status">Listo</span>
-  </header>
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">L</span><div><strong>LABEL LAB</strong><small>Generador de etiquetas</small></div></div>
+  <span class="status" id="status">Listo</span>
+</header>
 
-  <main class="container">
-    <section id="screen-home" class="screen active">
-      <div class="hero">
-        <div>
-          <span class="eyebrow">AUTOMATIZACIÓN</span>
-          <h1>Genera tus etiquetas<br><em>sin maquetarlas una a una.</em></h1>
-          <p>Elige un formato, carga tu CSV, personaliza el estilo y genera un PDF independiente por producto.</p>
+<main class="container">
+<section id="screen-home" class="screen active">
+  <div class="hero">
+    <span class="eyebrow">AUTOMATIZACIÓN</span>
+    <h1>Genera tus etiquetas<br><em>sin maquetarlas una a una.</em></h1>
+    <p>Elige un formato, carga tu CSV, ajusta cada elemento y genera un PDF independiente por producto.</p>
+  </div>
+  <div class="section-heading">
+    <div><span class="eyebrow">FORMATOS</span><h2>Selecciona una etiqueta</h2></div>
+    <span class="muted">Las imágenes de esta portada las podrás sustituir por las tuyas.</span>
+  </div>
+  <div class="template-grid" id="template-grid"></div>
+</section>
+
+<section id="screen-editor" class="screen">
+  <button class="back" id="backBtn">← Volver a formatos</button>
+  <div class="editor-head">
+    <div><span class="eyebrow">CONFIGURADOR</span><h1 id="editorTitle">Etiqueta</h1><p id="editorDescription"></p></div>
+    <div class="dimensions-pill" id="dimensionsPill">—</div>
+  </div>
+
+  <div class="workspace">
+    <aside class="panel">
+      <div class="panel-block">
+        <div class="panel-title">1. Datos</div>
+        <label class="dropzone" id="csvDropzone">
+          <input type="file" id="csvInput" accept=".csv,text/csv">
+          <span class="drop-icon">↑</span><strong>Sube tu CSV</strong><small>Arrastra el archivo aquí o haz clic</small>
+        </label>
+        <div class="file-info hidden" id="csvInfo"></div>
+      </div>
+
+      <div class="panel-block">
+        <div class="panel-title">2. Estilo general</div>
+        <div class="field-row">
+          <label>Fondo<input type="color" id="bgColor" value="#050505"></label>
+          <label>Texto<input type="color" id="textColor" value="#ffffff"></label>
+        </div>
+        <label class="field">Sangrado <span><input type="number" id="bleed" value="0" min="0" max="10" step="0.5"> mm</span></label>
+        <label class="field">Escala <span><input type="number" id="scale" value="100" min="50" max="200" step="5"> %</span></label>
+        <label class="field">Tipografía <span><select id="fontFamily"></select></span></label>
+        <label class="upload-small font-upload"><input type="file" id="fontInput" accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2"><span>Subir tipografía propia</span></label>
+        <div class="font-info hidden" id="fontInfo"></div>
+        <label class="toggle"><input type="checkbox" id="rounded"><span></span> Esquinas redondeadas</label>
+      </div>
+
+      <div class="panel-block">
+        <div class="panel-title">3. Logo</div>
+        <label class="upload-small"><input type="file" id="logoInput" accept="image/*"><span>Subir logo común</span></label>
+        <div class="logo-controls">
+          <div class="subheading">Posición y tamaño</div>
+          <div class="control-grid">
+            <label>X <input type="number" id="logoX" min="0" max="100" step="0.5"> %</label>
+            <label>Y <input type="number" id="logoY" min="0" max="100" step="0.5"> %</label>
+            <label>Ancho <input type="number" id="logoW" min="1" max="100" step="0.5"> %</label>
+            <label>Alto <input type="number" id="logoH" min="1" max="100" step="0.5"> %</label>
+          </div>
+          <label class="toggle logo-lock"><input type="checkbox" id="lockLogoAspect" checked><span></span> Bloquear relación de aspecto</label>
+          <small class="hint">También puedes arrastrar el logo directamente sobre la etiqueta y cambiar su tamaño desde la esquina inferior derecha. Con el bloqueo activado, mantiene sus proporciones.</small>
         </div>
       </div>
 
-      <div class="section-heading">
-        <div>
-          <span class="eyebrow">FORMATOS</span>
-          <h2>Selecciona una etiqueta</h2>
+      <div class="panel-block">
+        <div class="panel-title">4. QR</div>
+        <div class="field-row qr-color-row">
+          <label>Color QR<input type="color" id="qrColor" value="#ffffff"></label>
         </div>
-        <span class="muted">Plantillas iniciales inspiradas en tus diseños</span>
+        <div class="qr-controls">
+          <div class="subheading">Posición y tamaño</div>
+          <div class="control-grid">
+            <label>X <input type="number" id="qrX" min="0" max="100" step="0.5"> %</label>
+            <label>Y <input type="number" id="qrY" min="0" max="100" step="0.5"> %</label>
+            <label>Tamaño <input type="number" id="qrSize" min="1" max="100" step="0.5"> %</label>
+          </div>
+          <small class="hint">El QR se genera automáticamente a partir del enlace de la columna <strong>qr</strong> del CSV. Puedes arrastrarlo y cambiar su tamaño directamente sobre la etiqueta.</small>
+        </div>
       </div>
 
-      <div class="template-grid" id="template-grid"></div>
+      <div class="panel-block">
+        <div class="panel-title">5. Texto</div>
+        <label class="field">Elemento <span><select id="textElement">
+          <option value="producto">Nombre de producto</option>
+          <option value="color">Color</option>
+          <option value="tamano">Tamaño</option>
+          <option value="detalles">Detalles</option>
+        </select></span></label>
+        <div class="control-grid typography-grid">
+          <label>Tamaño <span><input type="number" id="textSize" min="1" max="100" step="0.5"> px</span></label>
+          <label>Peso <span><select id="textWeight"><option value="300">300</option><option value="400">400</option><option value="500">500</option><option value="600">600</option><option value="700">700</option><option value="800">800</option></select></span></label>
+          <label>Alineación <span><select id="textAlign"><option value="left">Izquierda</option><option value="center">Centro</option><option value="right">Derecha</option></select></span></label>
+          <label>Altura línea <span><input type="number" id="lineHeight" min="0.5" max="3" step="0.05"></span></label>
+          <label>Posición X <span><input type="number" id="textX" min="0" max="100" step="0.5"> %</span></label>
+          <label>Posición Y <span><input type="number" id="textY" min="0" max="100" step="0.5"> %</span></label>
+        </div>
+        <small class="hint">Estos ajustes se guardan por separado para cada elemento de texto.</small>
+      </div>
+
+
+      <div class="panel-block">
+        <div class="panel-title">6. Reglas y guías</div>
+        <div class="guide-buttons">
+          <button class="guide-btn" id="addGuideV" type="button">+ Guía vertical</button>
+          <button class="guide-btn" id="addGuideH" type="button">+ Guía horizontal</button>
+          <button class="guide-btn" id="toggleGuides" type="button">Ocultar guías</button>
+          <button class="guide-btn danger" id="deleteGuide" type="button">Eliminar seleccionada</button>
+          <button class="guide-btn danger" id="clearGuides" type="button">Eliminar todas</button>
+        </div>
+        <small class="hint">Las reglas muestran milímetros. Arrastra una guía para colocarla exactamente donde quieras. Haz doble clic sobre una guía para eliminarla.</small>
+      </div>
+      <div class="panel-block">
+        <div class="panel-title">7. Generar</div>
+        <button class="primary" id="generateBtn">Generar etiquetas <span>→</span></button>
+        <button class="secondary" id="folderBtn">Elegir carpeta de destino</button>
+        <div class="destination" id="destination">Si no eliges carpeta, se generará un ZIP con todos los PDFs.</div>
+      </div>
+    </aside>
+
+    <section class="preview-area">
+      <div class="preview-toolbar">
+        <div><strong>Vista previa</strong><span id="rowCounter">Sin CSV</span></div>
+        <div class="preview-nav"><button id="prevRow">←</button><button id="nextRow">→</button></div>
+      </div>
+      <div class="preview-stage">
+        <div class="canvas-wrap">
+          <div id="rulerH" class="ruler ruler-h"></div>
+          <div id="rulerV" class="ruler ruler-v"></div>
+          <div class="label-shadow">
+            <div id="labelPreview" class="label-preview"></div>
+            <div id="guideLayer" class="guide-layer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="preview-help"><span>Arrastra el logo para colocarlo.</span><span>Los controles de texto se aplican al elemento seleccionado.</span></div>
+      <div class="csv-columns" id="csvColumns"><span>Columnas recomendadas:</span><code>logo</code><code>producto</code><code>color</code><code>tamano</code><code>detalles</code><code>qr</code></div>
     </section>
+  </div>
+</section>
+</main>
+<div class="toast" id="toast"></div>
 
-    <section id="screen-editor" class="screen">
-      <button class="back" id="backBtn">← Volver a formatos</button>
-
-      <div class="editor-head">
-        <div>
-          <span class="eyebrow">CONFIGURADOR</span>
-          <h1 id="editorTitle">Etiqueta</h1>
-          <p id="editorDescription"></p>
-        </div>
-        <div class="dimensions-pill" id="dimensionsPill">—</div>
-      </div>
-
-      <div class="workspace">
-        <aside class="panel">
-          <div class="panel-block">
-            <div class="panel-title">1. Datos</div>
-            <label class="dropzone" id="csvDropzone">
-              <input type="file" id="csvInput" accept=".csv,text/csv">
-              <span class="drop-icon">↑</span>
-              <strong>Sube tu CSV</strong>
-              <small>Arrastra el archivo aquí o haz clic</small>
-            </label>
-            <div class="file-info hidden" id="csvInfo"></div>
-          </div>
-
-          <div class="panel-block">
-            <div class="panel-title">2. Estilo</div>
-            <div class="field-row">
-              <label>Fondo<input type="color" id="bgColor" value="#050505"></label>
-              <label>Texto<input type="color" id="textColor" value="#ffffff"></label>
-            </div>
-            <label class="field">Sangrado <span><input type="number" id="bleed" value="0" min="0" max="10" step="0.5"> mm</span></label>
-            <label class="field">Escala <span><input type="number" id="scale" value="100" min="50" max="200" step="5"> %</span></label>
-            <label class="toggle"><input type="checkbox" id="rounded"><span></span> Esquinas redondeadas</label>
-          </div>
-
-          <div class="panel-block">
-            <div class="panel-title">3. Logo</div>
-            <label class="upload-small">
-              <input type="file" id="logoInput" accept="image/*">
-              <span>Subir logo común (opcional)</span>
-            </label>
-            <small class="hint">También puedes usar una URL o data URL en la columna <b>logo</b> del CSV.</small>
-          </div>
-
-          <div class="panel-block">
-            <div class="panel-title">4. Generar</div>
-            <button class="primary" id="generateBtn">Generar etiquetas <span>→</span></button>
-            <button class="secondary" id="folderBtn">Elegir carpeta de destino</button>
-            <div class="destination" id="destination">Se descargará como ZIP si el navegador no permite elegir carpeta.</div>
-          </div>
-        </aside>
-
-        <section class="preview-area">
-          <div class="preview-toolbar">
-            <div>
-              <strong>Vista previa</strong>
-              <span id="rowCounter">Sin CSV</span>
-            </div>
-            <div class="preview-nav">
-              <button id="prevRow">←</button>
-              <button id="nextRow">→</button>
-            </div>
-          </div>
-          <div class="preview-stage">
-            <div class="label-shadow">
-              <div id="labelPreview" class="label-preview"></div>
-            </div>
-          </div>
-          <div class="csv-columns" id="csvColumns">
-            <span>Columnas esperadas:</span>
-            <code>logo</code><code>producto</code><code>color</code><code>tamano</code><code>detalles</code><code>qr</code>
-          </div>
-        </section>
-      </div>
-    </section>
-  </main>
-
-  <div class="toast" id="toast"></div>
-
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="js/app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
