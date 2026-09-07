@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generador de etiquetas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/font/lucide.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">L</span>
+      <div><strong>LABEL LAB</strong><small>Generador de etiquetas</small></div>
+    </div>
+    <span class="status" id="status">Listo</span>
+  </header>
+
+  <main class="container">
+    <section id="screen-home" class="screen active">
+      <div class="hero">
+        <div>
+          <span class="eyebrow">AUTOMATIZACIÓN</span>
+          <h1>Genera tus etiquetas<br><em>sin maquetarlas una a una.</em></h1>
+          <p>Elige un formato, carga tu CSV, personaliza el estilo y genera un PDF independiente por producto.</p>
+        </div>
+      </div>
+
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">FORMATOS</span>
+          <h2>Selecciona una etiqueta</h2>
+        </div>
+        <span class="muted">Plantillas iniciales inspiradas en tus diseños</span>
+      </div>
+
+      <div class="template-grid" id="template-grid"></div>
+    </section>
+
+    <section id="screen-editor" class="screen">
+      <button class="back" id="backBtn">← Volver a formatos</button>
+
+      <div class="editor-head">
+        <div>
+          <span class="eyebrow">CONFIGURADOR</span>
+          <h1 id="editorTitle">Etiqueta</h1>
+          <p id="editorDescription"></p>
+        </div>
+        <div class="dimensions-pill" id="dimensionsPill">—</div>
+      </div>
+
+      <div class="workspace">
+        <aside class="panel">
+          <div class="panel-block">
+            <div class="panel-title">1. Datos</div>
+            <label class="dropzone" id="csvDropzone">
+              <input type="file" id="csvInput" accept=".csv,text/csv">
+              <span class="drop-icon">↑</span>
+              <strong>Sube tu CSV</strong>
+              <small>Arrastra el archivo aquí o haz clic</small>
+            </label>
+            <div class="file-info hidden" id="csvInfo"></div>
+          </div>
+
+          <div class="panel-block">
+            <div class="panel-title">2. Estilo</div>
+            <div class="field-row">
+              <label>Fondo<input type="color" id="bgColor" value="#050505"></label>
+              <label>Texto<input type="color" id="textColor" value="#ffffff"></label>
+            </div>
+            <label class="field">Sangrado <span><input type="number" id="bleed" value="0" min="0" max="10" step="0.5"> mm</span></label>
+            <label class="field">Escala <span><input type="number" id="scale" value="100" min="50" max="200" step="5"> %</span></label>
+            <label class="toggle"><input type="checkbox" id="rounded"><span></span> Esquinas redondeadas</label>
+          </div>
+
+          <div class="panel-block">
+            <div class="panel-title">3. Logo</div>
+            <label class="upload-small">
+              <input type="file" id="logoInput" accept="image/*">
+              <span>Subir logo común (opcional)</span>
+            </label>
+            <small class="hint">También puedes usar una URL o data URL en la columna <b>logo</b> del CSV.</small>
+          </div>
+
+          <div class="panel-block">
+            <div class="panel-title">4. Generar</div>
+            <button class="primary" id="generateBtn">Generar etiquetas <span>→</span></button>
+            <button class="secondary" id="folderBtn">Elegir carpeta de destino</button>
+            <div class="destination" id="destination">Se descargará como ZIP si el navegador no permite elegir carpeta.</div>
+          </div>
+        </aside>
+
+        <section class="preview-area">
+          <div class="preview-toolbar">
+            <div>
+              <strong>Vista previa</strong>
+              <span id="rowCounter">Sin CSV</span>
+            </div>
+            <div class="preview-nav">
+              <button id="prevRow">←</button>
+              <button id="nextRow">→</button>
+            </div>
+          </div>
+          <div class="preview-stage">
+            <div class="label-shadow">
+              <div id="labelPreview" class="label-preview"></div>
+            </div>
+          </div>
+          <div class="csv-columns" id="csvColumns">
+            <span>Columnas esperadas:</span>
+            <code>logo</code><code>producto</code><code>color</code><code>tamano</code><code>detalles</code><code>qr</code>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
