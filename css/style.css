@@ -58,3 +58,8 @@ button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!impo
 .custom-size-grid label{min-width:0}
 .custom-size-grid input{width:85px}
 .hidden{display:none!important}
+
+
+/* ---- Sangrado y marcas de recorte ---- */
+.bleed-color-row{margin-top:8px}
+.export-option{padding:0 0 10px}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Generador de etiquetas</title>
+  <title>Label Lab — Generador de etiquetas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,6 +12,7 @@
 <body>
 <header class="topbar">
   <div class="brand"><span class="brand-mark">L</span><div><strong>LABEL LAB</strong><small>Generador de etiquetas</small></div></div>
+  <span class="status" id="status">Listo</span>
 </header>
 
 <main class="container">
@@ -23,6 +24,7 @@
   </div>
   <div class="section-heading">
     <div><span class="eyebrow">FORMATOS</span><h2>Selecciona una etiqueta</h2></div>
+    <span class="muted">Las imágenes de esta portada las podrás sustituir por las tuyas.</span>
   </div>
   <div class="template-grid" id="template-grid"></div>
   <div class="custom-template-card">
@@ -70,6 +72,9 @@
           <label>Texto<input type="color" id="textColor" value="#ffffff"></label>
         </div>
         <label class="field">Sangrado <span><input type="number" id="bleed" value="0" min="0" max="10" step="0.5"> mm</span></label>
+        <div class="field-row bleed-color-row">
+          <label>Color de sangrado<input type="color" id="bleedColor" value="#050505"></label>
+        </div>
         <label class="field">Escala <span><input type="number" id="scale" value="100" min="50" max="200" step="5"> %</span></label>
         <label class="field">Tipografía <span><select id="fontFamily"></select></span></label>
         <label class="upload-small font-upload"><input type="file" id="fontInput" accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2"><span>Subir tipografía propia</span></label>
@@ -98,6 +103,7 @@
         <div class="field-row qr-color-row">
           <label>Color QR<input type="color" id="qrColor" value="#ffffff"></label>
         </div>
+        <label class="toggle"><input type="checkbox" id="showQR" checked><span></span> Mostrar QR en la etiqueta</label>
         <div class="qr-controls">
           <div class="subheading">Posición y tamaño</div>
           <div class="control-grid">
@@ -142,6 +148,9 @@
       </div>
       <div class="panel-block">
         <div class="panel-title">7. Generar</div>
+        <label class="toggle export-option"><input type="checkbox" id="cropMarks"><span></span> Añadir marcas de recorte al PDF</label>
+        <label>Color de las marcas de recorte<input type="color" id="cropColor" value="#FFFFFF"></label>
+        <small class="hint">Las marcas se colocan alrededor de cada etiqueta para indicar la línea exacta de corte. El color es independiente del color del sangrado.</small>
         <button class="primary" id="generateBtn">Generar etiquetas <span>→</span></button>
         <button class="secondary" id="folderBtn">Elegir carpeta de destino</button>
         <div class="destination" id="destination">Si no eliges carpeta, se generará un ZIP con todos los PDFs.</div>

@@ -26,6 +26,10 @@ let qrState={x:7,y:20,size:22};
 let qrDataUrl=null;
 let qrGenerationKey="";
 let qrColor="#ffffff";
+let showQR=true;
+let bleedColor="#050505";
+let cropMarks=false;
+let cropColor="#FFFFFF";
 let textStyles=JSON.parse(JSON.stringify(DEFAULT_TEXT));
 const DEFAULT_TEXT_POSITIONS={
   "70x40":{producto:{x:54,y:31,w:42},color:{x:54,y:49,w:42},tamano:{x:54,y:63,w:42},detalles:{x:54,y:76,w:42}},
@@ -129,7 +133,11 @@ $("#fontInput").addEventListener("change",async e=>{
 });
 
 ["bgColor","textColor","bleed","scale","rounded"].forEach(id=>$("#"+id).addEventListener("input",updatePreview));
+$("#bleedColor").addEventListener("input",e=>{bleedColor=e.target.value;updatePreview()});
+$("#cropMarks").addEventListener("change",e=>{cropMarks=e.target.checked;updatePreview()});
+$("#cropColor").addEventListener("input",e=>{cropColor=e.target.value;updatePreview()});
 $("#qrColor").addEventListener("input",e=>{qrColor=e.target.value;qrDataUrl=null;qrGenerationKey="";updatePreview()});
+$("#showQR").addEventListener("change",e=>{showQR=e.target.checked;updatePreview()});
 $("#prevRow").onclick=()=>{if(rows.length){currentRow=(currentRow-1+rows.length)%rows.length;updatePreview()}};
 $("#nextRow").onclick=()=>{if(rows.length){currentRow=(currentRow+1)%rows.length;updatePreview()}};
 
@@ -273,13 +281,21 @@ function applyElementStyles(){
 async function updatePreview(){
  const d=rowData(rows[currentRow]||{producto:"GALDANA",color:"OCRE",tamano:"15X15",detalles:"",qr:""});
  const [w,h]=selectedTemplate.size,scale=Number($("#scale").value||100)/100,bleed=Number($("#bleed").value||0),p=$("#labelPreview");
- p.style.width=mmToPx(w*scale+bleed*2)+"px";p.style.height=mmToPx(h*scale+bleed*2)+"px";p.style.background=$("#bgColor").value;p.style.color=$("#textColor").value;
+ const trimW=w*scale,trimH=h*scale,outerW=trimW+bleed*2,outerH=trimH+bleed*2;
+ p.style.width=mmToPx(outerW)+"px";p.style.height=mmToPx(outerH)+"px";
+ p.style.background=bleed>0?bleedColor:$("#bgColor").value;p.style.color=$("#textColor").value;
  p.classList.toggle("rounded",$("#rounded").checked);
- const qr=await ensureQR(rows[currentRow]||d);
- p.innerHTML=labelHTML(d,qr);applyElementStyles();syncLogoControls();syncQRControls();bindCanvasInteractions();
+ const qr=showQR ? await ensureQR(rows[currentRow]||d) : null;
+ p.innerHTML=labelHTML(d,qr);
+ const content=p.querySelector(".label-content");
+ if(content){
+   content.style.width=mmToPx(trimW)+"px";content.style.height=mmToPx(trimH)+"px";
+   content.style.margin=bleed>0?mmToPx(bleed)+"px":"0";
+   content.style.background=$("#bgColor").value;content.style.color=$("#textColor").value;
+ }
+ applyElementStyles();syncLogoControls();syncQRControls();bindCanvasInteractions();renderGuides();
  $("#rowCounter").textContent=rows.length?`${currentRow+1} / ${rows.length}`:"Ejemplo";
 }
-
 function bindCanvasInteractions(){
  const p=$("#labelPreview");
  const logo=p.querySelector("#editableLogo");
@@ -311,20 +327,24 @@ function bindCanvasInteractions(){
 }
 
 function renderRulers(){
- const h=$('#rulerH'),v=$('#rulerV'),p=$('#labelPreview'); if(!h||!v||!p)return;
- const [w,hmm]=selectedTemplate.size;
- h.style.width=p.offsetWidth+'px';v.style.height=p.offsetHeight+'px';
- h.innerHTML='';v.innerHTML='';
- for(let mm=0;mm<=w;mm+=10){const el=document.createElement('span');el.className='ruler-tick ruler-tick-h';el.style.left=(mm/w*100)+'%';el.innerHTML=`<b>${mm}</b>`;h.appendChild(el)}
- for(let mm=0;mm<=hmm;mm+=5){const el=document.createElement('span');el.className='ruler-tick ruler-tick-v';el.style.top=(mm/hmm*100)+'%';el.innerHTML=`<b>${mm}</b>`;v.appendChild(el)}
+ const rh=$("#rulerH"),rv=$("#rulerV"),p=$("#labelPreview"); if(!rh||!rv||!p)return;
+ const [w,hmm]=selectedTemplate.size,scale=Number($("#scale").value||100)/100,bleed=Number($("#bleed").value||0);
+ const trimW=w*scale,trimH=hmm*scale,bleedPx=mmToPx(bleed);
+ rh.style.width=mmToPx(trimW)+'px';rh.style.left=bleedPx+'px';
+ rv.style.height=mmToPx(trimH)+'px';rv.style.top=bleedPx+'px';
+ rh.innerHTML='';rv.innerHTML='';
+ for(let mm=0;mm<=w;mm+=10){const el=document.createElement('span');el.className='ruler-tick ruler-tick-h';el.style.left=(mm/w*100)+'%';el.innerHTML=`<b>${mm}</b>`;rh.appendChild(el)}
+ for(let mm=0;mm<=hmm;mm+=5){const el=document.createElement('span');el.className='ruler-tick ruler-tick-v';el.style.top=(mm/hmm*100)+'%';el.innerHTML=`<b>${mm}</b>`;rv.appendChild(el)}
 }
 function renderGuides(){
- const layer=$('#guideLayer'); if(!layer)return;
- layer.innerHTML='';layer.classList.toggle('guides-hidden',!guides.visible);
- guides.items.forEach(g=>{
+ const layer=$("#guideLayer"); if(!layer)return;
+ const [w,h]=selectedTemplate.size,scale=Number($("#scale").value||100)/100,bleed=Number($("#bleed").value||0);
+ layer.style.left=mmToPx(bleed)+'px';layer.style.top=mmToPx(bleed)+'px';
+ layer.style.width=mmToPx(w*scale)+'px';layer.style.height=mmToPx(h*scale)+'px';
+ layer.innerHTML='';layer.classList.toggle('guides-hidden',!guides.visible); guides.items.forEach(g=>{
    const el=document.createElement('div');el.className=`guide guide-${g.type}`;el.dataset.id=g.id;el.style[g.type==='v'?'left':'top']=g.pos+'%';
    el.title='Arrastra para mover · doble clic para eliminar';
-   el.onpointerdown=e=>{e.preventDefault();e.stopPropagation();selectedGuideId=g.id;const p=$('#labelPreview'),r=p.getBoundingClientRect();dragState={type:'guide',id:g.id,startX:e.clientX,startY:e.clientY,start:g.pos};el.setPointerCapture(e.pointerId);
+   el.onpointerdown=e=>{e.preventDefault();e.stopPropagation();selectedGuideId=g.id;const r=layer.getBoundingClientRect();dragState={type:'guide',id:g.id,startX:e.clientX,startY:e.clientY,start:g.pos};el.setPointerCapture(e.pointerId);
      el.onpointermove=ev=>{if(!dragState||dragState.type!=='guide')return;const delta=(g.type==='v'?(ev.clientX-dragState.startX)/r.width:(ev.clientY-dragState.startY)/r.height)*100;g.pos=clamp(dragState.start+delta,0,100);el.style[g.type==='v'?'left':'top']=g.pos+'%'};
      el.onpointerup=()=>dragState=null;el.onpointercancel=()=>dragState=null;};
    el.ondblclick=e=>{e.stopPropagation();guides.items=guides.items.filter(x=>x.id!==g.id);selectedGuideId=null;renderGuides()};
@@ -398,11 +418,28 @@ async function rasterizeImagesForExport(clone){
  }));
 }
 
+function addCropMarks(doc, w, h, bleed, color="#FFFFFF"){
+ if(!cropMarks)return;
+ // Las marcas necesitan una zona exterior a la línea de corte. Si no hay
+ // sangrado, reservamos igualmente 4 mm para que nunca queden fuera del PDF.
+ const markArea = bleed > 0 ? bleed : 4;
+ const left=markArea, top=markArea, right=markArea+w, bottom=markArea+h;
+ const len=Math.min(4, Math.max(2, markArea-0.5));
+ const gap=Math.min(0.8, Math.max(0.4, markArea/4));
+ doc.setDrawColor(color||"#FFFFFF");
+ doc.setLineWidth(0.15);
+ doc.line(left-gap-len,top,left-gap,top); doc.line(left,top-gap-len,left,top-gap);
+ doc.line(right+gap,top,right+gap+len,top); doc.line(right,top-gap-len,right,top-gap);
+ doc.line(left-gap-len,bottom,left-gap,bottom); doc.line(left,bottom+gap,left,bottom+gap+len);
+ doc.line(right+gap,bottom,right+gap+len,bottom); doc.line(right,bottom+gap,right,bottom+gap+len);
+}
+
 async function createPDF(row){
  const {jsPDF}=window.jspdf,[w,h]=selectedTemplate.size;
  const bleed=Number($("#bleed").value||0);
  const scale=Number($("#scale").value||100)/100;
- const totalW=w*scale+bleed*2,totalH=h*scale+bleed*2;
+ const markArea=(cropMarks && bleed<=0)?4:bleed;
+ const totalW=w*scale+markArea*2,totalH=h*scale+markArea*2;
 
  const oldRows=rows,oldCurrent=currentRow;
  rows=[row];currentRow=0;await updatePreview();
@@ -462,10 +499,15 @@ async function createPDF(row){
      compress:true
    });
 
+   const imageOffset = (cropMarks && bleed<=0) ? markArea : 0;
+   const imageW = (cropMarks && bleed<=0) ? w*scale : totalW;
+   const imageH = (cropMarks && bleed<=0) ? h*scale : totalH;
    doc.addImage(
      canvas.toDataURL("image/png"),
-     "PNG",0,0,totalW,totalH,undefined,"FAST"
+     "PNG",imageOffset,imageOffset,imageW,imageH,undefined,"FAST"
    );
+
+   addCropMarks(doc,w*scale,h*scale,bleed,cropColor);
 
    return doc.output("arraybuffer");
  }finally{
